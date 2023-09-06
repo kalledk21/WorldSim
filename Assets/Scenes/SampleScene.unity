@@ -294,7 +294,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.14202426, y: 0, z: 0, w: 0.9898632}
-  m_LocalPosition: {x: 0, y: 0.3, z: -1}
+  m_LocalPosition: {x: 0, y: 0.33, z: -1.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -312,7 +312,6 @@ GameObject:
   - component: {fileID: 1839433886}
   - component: {fileID: 1839433885}
   - component: {fileID: 1839433884}
-  - component: {fileID: 1839433883}
   - component: {fileID: 1839433887}
   m_Layer: 0
   m_Name: Cube
@@ -321,19 +320,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!65 &1839433883
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1839433882}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &1839433884
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -411,3 +397,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9eac511f342ca974cac606de612ce2aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  turnsPerSecond: 0.006

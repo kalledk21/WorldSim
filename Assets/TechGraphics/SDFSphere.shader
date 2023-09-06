@@ -24,12 +24,10 @@ Shader "Tectonics/SDFSphere"
             struct appdata
             {
                 float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
             };
 
             struct v2f
             {
-                float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
                 float4 worldPos : TEXCOORD1;
             };
@@ -57,8 +55,10 @@ Shader "Tectonics/SDFSphere"
                 return ((RGB - 1) * HSV.y + 1) * HSV.z;
             }
 
-            fixed4 randomCol(int index)
+            fixed4 randomCol(int index, float minChange)
             {
+                if(minChange < 0.01)
+                     return fixed4(0,0,0,1);
                 float accumulation = frac(index*golden);
                 float3 HSV = float3(accumulation, 0.75, 1-accumulation*0.4);
                 return fixed4(HSVtoRGB(HSV),1);
@@ -81,19 +81,34 @@ Shader "Tectonics/SDFSphere"
 
             fixed4 shadeSphere(float3 position)
             {
-                float minVal = 99;
+                float minDist = 99;
                 int index = 0;
                 for (int i = 0; i < 8; i++)
                 {
                     float dist = SphereArcDist(position, dirs[i]);
-                    if(dist < minVal)
+                    if(dist < minDist)
                     {
                         index = i;
-                        minVal = dist;
+                        minDist = dist;
                     }
 
                 }
-                return randomCol(index);
+                
+                float minChange = 99;
+                for (int k = 0; k < 8; k++)
+                {
+                    if(k != index)
+                    {
+                        float otherDist = SphereArcDist(position, dirs[k]);
+                        float change = abs(minDist - otherDist);
+                        if(change < minChange)
+                        {
+                            minChange = change;
+                        }
+                    }
+
+                }
+                return randomCol(index, minChange);
                 //return fixed4(position / SPHERERADIUS * 0.5 + 0.5, 1);
             }
 
