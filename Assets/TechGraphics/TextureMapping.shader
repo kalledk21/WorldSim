@@ -40,20 +40,6 @@ Shader "Tectonics/TextureMapping"
                 float4 worldPos : TEXCOORD0;
             };
 
-            float SphereArcDist(float3 a, float3 b)
-            {
-#ifdef SECURE
-                a = normalize(a);
-                b = normalize(b);
-#endif
-                return acos(dot(a,b));
-            }
-
-            fixed4 uvVisualizer(float2 uv)
-            {
-                return frac(fixed4(uv.x, uv.y, .999,1));
-            }
-            
             v2f vert (appdata v)
             {
                 v2f o;
@@ -65,9 +51,10 @@ Shader "Tectonics/TextureMapping"
             fixed4 frag (v2f i) : SV_Target
             {
                 float3 dir = normalize(i.worldPos.xyz);
-                float2 uv = acos(-dir.y)/(HALF_PI/_TexturePlacement.w);
-                uv.x = atan2(dir.z , dir.x)/(HALF_PI/_TexturePlacement.w);
-                uv+=0.5/_TexturePlacement.w;
+                float2 uv = 0;
+                uv.y = atan2(dir.y, dir.x)/(HALF_PI/_TexturePlacement.w);
+                uv.x = atan2(dir.z, dir.x)/(HALF_PI/_TexturePlacement.w);
+                uv += 0.5;
                 fixed4 col = tex2D(_Texture, uv);
                 return col;
             }
