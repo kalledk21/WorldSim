@@ -1,4 +1,4 @@
-Shader "Tectonics/SDFSphere"
+Shader "Tectonics/RegularSphere"
 {
     Properties
     {
@@ -111,32 +111,10 @@ Shader "Tectonics/SDFSphere"
                 return randomCol(index, minChange);
                 //return fixed4(position / SPHERERADIUS * 0.5 + 0.5, 1);
             }
-
-            float sphereDistance (float3 p)
-            {
-                return distance(p,0) - SPHERERADIUS;
-            }
-
-            fixed4 raymarch (float3 position, float3 direction)
-            {
-                for (int i = 0; i < STEPS; i++)
-                {
-                    float distance = sphereDistance(position);
-                    if (distance < MIN_DISTANCE)
-                    {
-                        return shadeSphere(position);
-                    }
-                    position += distance * direction;
-                }
-                discard;
-                return 0;
-            }
-
+            
             fixed4 frag (v2f i) : SV_Target
             {
-                float3 worldPosition = i.worldPos;
-                float3 viewDirection = normalize(i.worldPos - mul(unity_WorldToObject, _WorldSpaceCameraPos));
-                return raymarch (worldPosition, viewDirection);
+                return shadeSphere(i.worldPos);
             }
             ENDCG
         }
