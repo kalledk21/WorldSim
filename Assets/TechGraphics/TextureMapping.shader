@@ -47,13 +47,28 @@ Shader "Tectonics/TextureMapping"
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 return o;
             }
+
+            float3x3 rotation(float3 rot)
+            {
+                float a = rot.x;
+                float b = rot.y;
+                float c = rot.z;
+
+                return float3x3
+                (
+                    cos(a)*cos(b), cos(a)*sin(b)*sin(c)-sin(a)*cos(c), cos(a)*sin(b)*cos(c)+sin(a)*sin(c),
+                    sin(a)*cos(b), sin(a)*sin(b)*sin(c)+cos(a)*cos(c), sin(a)*sin(b)*cos(c)-cos(a)*sin(c),
+                    -sin(b), cos(b)*sin(c), cos(b)*cos(c)
+                );
+            }
             
             fixed4 frag (v2f i) : SV_Target
             {
                 float3 dir = normalize(i.worldPos.xyz);
+                dir = mul(dir, rotation(_TexturePlacement.xyz));
                 float2 uv = 0;
-                uv.y = atan2(dir.y, dir.x)/(HALF_PI/_TexturePlacement.w);
-                uv.x = atan2(dir.z, dir.x)/(HALF_PI/_TexturePlacement.w);
+                uv.x = atan2(dir.z, dir.x)/(HALF_PI*_TexturePlacement.w);
+                uv.y = atan2(dir.y, dir.x)/(HALF_PI*_TexturePlacement.w);
                 uv += 0.5;
                 fixed4 col = tex2D(_Texture, uv);
                 return col;
