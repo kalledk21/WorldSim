@@ -2,6 +2,8 @@ Shader "Tectonics/RegularSphere"
 {
     Properties
     {
+        _LineWidth ("Line Width", Float) = 0.01
+        _PointWidth ("Point Width", Float) = 0.03
     }
     SubShader
     {
@@ -20,6 +22,11 @@ Shader "Tectonics/RegularSphere"
             #define SECURE 1
 
             #include "UnityCG.cginc"
+
+            struct arrayData
+            {
+                float data[8];
+            };
 
             struct appdata
             {
@@ -41,6 +48,8 @@ Shader "Tectonics/RegularSphere"
             }
 
             static const float golden = 0.618033988749895;
+            float _LineWidth;
+            float _PointWidth;
 
             float3 HUEtoRGB(in float H)
             {
@@ -55,16 +64,27 @@ Shader "Tectonics/RegularSphere"
                 return ((RGB - 1) * HSV.y + 1) * HSV.z;
             }
 
-            fixed4 randomCol(int index, float minChange)
+            // fixed4 randomCol(int index, float minChange)
+            // {
+            //     if(minChange < 0.01)
+            //          return fixed4(0,0,0,1);
+            //     float accumulation = frac(index*golden);
+            //     float3 HSV = float3(accumulation, 0.75, 0.6-accumulation*0.2);
+            //     return fixed4(HSVtoRGB(HSV),1);
+            // }
+            
+            fixed4 randomColArray(int index, float minChange[8])
             {
-                if(minChange < 0.01)
+                if(minChange[0] < _PointWidth && minChange[1] < _PointWidth)
+                     return 1;
+                if(minChange[0] < _LineWidth)
                      return fixed4(0,0,0,1);
                 float accumulation = frac(index*golden);
-                float3 HSV = float3(accumulation, 0.75, 1-accumulation*0.4);
+                float3 HSV = float3(accumulation, 0.85, 0.5-accumulation*0.2);
                 return fixed4(HSVtoRGB(HSV),1);
             }
 
-            static const int STEPS = 32;
+            static const int POINT_AMOUNT = 8;
             static const float MIN_DISTANCE = 0.001;
             static const float SPHERERADIUS = 0.49f;
             
@@ -78,12 +98,34 @@ Shader "Tectonics/RegularSphere"
 #endif
                 return acos(dot(a,b));
             }
+            
+            arrayData SortArray(float NumArray[POINT_AMOUNT])
+            {
+                for (int i = 0; i < POINT_AMOUNT - 1; i++)
+                {
+                    float smallestVal = i;
+                    for (int j = i + 1; j < POINT_AMOUNT; j++)
+                    {
+                        if (NumArray[j] < NumArray[smallestVal])
+                        {
+                            smallestVal = j;
+                        }
+                    }
+                    float tempVar = NumArray[smallestVal];
+                    NumArray[smallestVal] = NumArray[i];
+                    NumArray[i] = tempVar;
+                }
+                arrayData data;
+                data.data = NumArray;
+                return data;
+            }
+
 
             fixed4 shadeSphere(float3 position)
             {
                 float minDist = 99;
                 int index = 0;
-                for (int i = 0; i < 8; i++)
+                for (int i = 0; i < POINT_AMOUNT; i++)
                 {
                     float dist = SphereArcDist(position, dirs[i]);
                     if(dist < minDist)
@@ -93,14 +135,16 @@ Shader "Tectonics/RegularSphere"
                     }
 
                 }
-                
+                float changes[POINT_AMOUNT];
                 float minChange = 99;
                 for (int k = 0; k < 8; k++)
                 {
+                    changes[k] = 99;
                     if(k != index)
                     {
                         float otherDist = SphereArcDist(position, dirs[k]);
                         float change = abs(minDist - otherDist);
+                        changes[k] = change;
                         if(change < minChange)
                         {
                             minChange = change;
@@ -108,7 +152,8 @@ Shader "Tectonics/RegularSphere"
                     }
 
                 }
-                return randomCol(index, minChange);
+                arrayData data = SortArray(changes);
+                return randomColArray(index+19, data.data);
                 //return fixed4(position / SPHERERADIUS * 0.5 + 0.5, 1);
             }
             
